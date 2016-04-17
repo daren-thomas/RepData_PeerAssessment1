@@ -108,7 +108,49 @@ median(daily.activity$total, na.rm=TRUE)
 
 ## What is the average daily activity pattern?
 
+1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
+We need to re-group the data, this time per interval:
+
+
+```r
+interval.activity <- group_by(activity, interval) %>% summarize(avg.steps = mean(steps, na.rm = TRUE))
+```
+
+Then we can plot the time series:
+
+
+```r
+qplot(interval, avg.steps, data=interval.activity, geom='line')
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)
+
+2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+
+```r
+filter(interval.activity, avg.steps==max(avg.steps)) %>% select(interval)
+```
+
+```
+## Source: local data frame [1 x 1]
+## 
+##   interval
+##      (int)
+## 1      835
+```
+
+Looks like at interval 835. Hm... I wonder what time that is... say we added `835 / 5` minutes to midnight...
+
+```r
+midnight <- ymd('2016-04-17')
+midnight + minutes(835 / 5)
+```
+
+```
+## [1] "2016-04-17 02:47:00 UTC"
+```
 
 ## Imputing missing values
 
