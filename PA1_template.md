@@ -191,10 +191,8 @@ Let us reuse some code from above, but using `activity.imputed` as input instead
 
 ```r
 daily.activity.imputed <- group_by(activity.imputed, date) %>% summarize(total = sum(steps))
-qplot(daily.activity.imputed$total, binwidth=1000)
+p <- qplot(daily.activity.imputed$total, binwidth=1000)
 ```
-
-![](PA1_template_files/figure-html/unnamed-chunk-12-1.png)
 
 - The mean total number of steps taken each day was 
 
@@ -205,6 +203,8 @@ mean(daily.activity.imputed$total)
 ```
 ## [1] 10766.19
 ```
+(this is a difference of NA)
+
 - and the median was 
 
 ```r
@@ -214,5 +214,21 @@ median(daily.activity.imputed$total)
 ```
 ## [1] 10766.19
 ```
+(this is a difference of NA)
+
+If we compare the histograms by placing them over each other:
+
+
+```r
+ggplot(data=daily.activity, aes(x = total)) + geom_histogram(data=daily.activity, fill='red', alpha=0.2, binwidth=1000) + geom_histogram(data=daily.activity.imputed, fill='blue', alpha=0.2, binwidth=1000)
+```
+
+```
+## Warning: Removed 8 rows containing non-finite values (stat_bin).
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-15-1.png)
+
+we see how these differences play out... The bin 11'000-12'000 gains a lot of new values.
 
 ## Are there differences in activity patterns between weekdays and weekends?

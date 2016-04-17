@@ -113,16 +113,45 @@ Let us reuse some code from above, but using `activity.imputed` as input instead
 
 ```{r}
 daily.activity.imputed <- group_by(activity.imputed, date) %>% summarize(total = sum(steps))
-qplot(daily.activity.imputed$total, binwidth=1000)
+p <- qplot(daily.activity.imputed$total, binwidth=1000)
 ```
 
 - The mean total number of steps taken each day was 
 ```{r} 
 mean(daily.activity.imputed$total)
 ``` 
+(this is a difference of `r mean(daily.activity.imputed$total) - mean(daily.activity$total, na.rm=TRUE)` - the mean does not change!)
+
 - and the median was 
 ```{r}
 median(daily.activity.imputed$total)
 ```
+(this is a difference of `r median(daily.activity.imputed$total) - median(daily.activity$total, na.rm=TRUE)` - the median shifts to the right)
+
+If we compare the histograms by placing them over each other:
+
+```{r}
+ggplot(data=daily.activity, aes(x = total)) + geom_histogram(data=daily.activity, fill='red', alpha=0.2, binwidth=1000) + geom_histogram(data=daily.activity.imputed, fill='blue', alpha=0.2, binwidth=1000)
+```
+
+we see how these differences play out... The bin 11'000-12'000 gains a lot of new values.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+1. Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
+```{r}
+activity.imputed$day <- factor(weekdays(activity.imputed$date) %in% c('Saturday', 'Sunday'))
+levels(activity.imputed$day)[levels(activity.imputed$day) == TRUE] <- 'weekend'
+levels(activity.imputed$day)[levels(activity.imputed$day) == FALSE] <- 'weekday'
+```
+
+2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). The plot should look something like the following, which was created using simulated data:
+
+```{r}
+interval.activity.imputed <- group_by(activity.imputed, day, interval) %>% summarize(avg.steps = mean(steps))
+p <- ggplot(interval.activity.imputed, aes(x=interval, y=avg.steps)) + geom_line() + facet_grid(day ~ .)
+print(p)
+```
+
+Yes, there are differences in the activity patterns! It looks like subject does a morning walk on weekdays, but on weekends subject gets up off the couch and does stuff the whole day long!
