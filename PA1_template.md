@@ -141,7 +141,7 @@ filter(interval.activity, avg.steps==max(avg.steps)) %>% select(interval)
 ## 1      835
 ```
 
-Looks like at interval 835. Hm... I wonder what time that is... say we added `835 / 5` minutes to midnight...
+Looks like at interval 835.
 
 
 ## Imputing missing values
@@ -191,8 +191,10 @@ Let us reuse some code from above, but using `activity.imputed` as input instead
 
 ```r
 daily.activity.imputed <- group_by(activity.imputed, date) %>% summarize(total = sum(steps))
-p <- qplot(daily.activity.imputed$total, binwidth=1000)
+qplot(daily.activity.imputed$total, binwidth=1000)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png)
 
 - The mean total number of steps taken each day was 
 
@@ -203,7 +205,7 @@ mean(daily.activity.imputed$total)
 ```
 ## [1] 10766.19
 ```
-(this is a difference of NA)
+(this is a difference of 0 - the mean does not change!)
 
 - and the median was 
 
@@ -214,7 +216,7 @@ median(daily.activity.imputed$total)
 ```
 ## [1] 10766.19
 ```
-(this is a difference of NA)
+(this is a difference of 1.1886792 - the median shifts to the right)
 
 If we compare the histograms by placing them over each other:
 
@@ -232,3 +234,25 @@ ggplot(data=daily.activity, aes(x = total)) + geom_histogram(data=daily.activity
 we see how these differences play out... The bin 11'000-12'000 gains a lot of new values.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+1. Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
+
+```r
+activity.imputed$day <- factor(weekdays(activity.imputed$date) %in% c('Saturday', 'Sunday'))
+levels(activity.imputed$day)[levels(activity.imputed$day) == TRUE] <- 'weekend'
+levels(activity.imputed$day)[levels(activity.imputed$day) == FALSE] <- 'weekday'
+```
+
+2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). The plot should look something like the following, which was created using simulated data:
+
+
+```r
+interval.activity.imputed <- group_by(activity.imputed, day, interval) %>% summarize(avg.steps = mean(steps))
+p <- ggplot(interval.activity.imputed, aes(x=interval, y=avg.steps)) + geom_line() + facet_grid(day ~ .)
+print(p)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-17-1.png)
+
+Yes, there are differences in the activity patterns! It looks like subject does a morning walk on weekdays, but on weekends subject gets up off the couch and does stuff the whole day long!

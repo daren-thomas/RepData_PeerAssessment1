@@ -71,7 +71,7 @@ qplot(interval, avg.steps, data=interval.activity, geom='line')
 filter(interval.activity, avg.steps==max(avg.steps)) %>% select(interval)
 ```
 
-Looks like at interval 835. Hm... I wonder what time that is... say we added `835 / 5` minutes to midnight...
+Looks like at interval 835.
 
 
 ## Imputing missing values
@@ -113,7 +113,7 @@ Let us reuse some code from above, but using `activity.imputed` as input instead
 
 ```{r}
 daily.activity.imputed <- group_by(activity.imputed, date) %>% summarize(total = sum(steps))
-p <- qplot(daily.activity.imputed$total, binwidth=1000)
+qplot(daily.activity.imputed$total, binwidth=1000)
 ```
 
 - The mean total number of steps taken each day was 
