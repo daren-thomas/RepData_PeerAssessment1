@@ -88,14 +88,14 @@ sum(is.na(activity$steps))
 
 There are a total of 2304 missing values in the dataset.
 
-2 .Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
 I decide to use the mean for the 5-minute interval. Now I just need to figure out how to add this to the dataset...
 Let's create an `activity.imputed` version...
 
 ```{r}
 activity.imputed <- merge(activity, interval.activity)
-activity.imputed$imputed.steps <- ifelse(is.na(activity.imputed$steps), 
+activity.imputed$steps <- ifelse(is.na(activity.imputed$steps), 
                                          activity.imputed$avg.steps, activity.imputed$steps)
 ```
 
@@ -104,9 +104,25 @@ activity.imputed$imputed.steps <- ifelse(is.na(activity.imputed$steps),
 see `activity.imputed` above. let's just drop off the `avg.steps` column to make it equal to the original dataset:
 
 ```{r}
-
+activity.imputed <- select(activity.imputed, steps, date, interval)
 ```
 
 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+Let us reuse some code from above, but using `activity.imputed` as input instead:
+
+```{r}
+daily.activity.imputed <- group_by(activity.imputed, date) %>% summarize(total = sum(steps))
+qplot(daily.activity.imputed$total, binwidth=1000)
+```
+
+- The mean total number of steps taken each day was 
+```{r} 
+mean(daily.activity.imputed$total)
+``` 
+- and the median was 
+```{r}
+median(daily.activity.imputed$total)
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?

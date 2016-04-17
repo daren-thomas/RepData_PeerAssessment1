@@ -143,17 +143,76 @@ filter(interval.activity, avg.steps==max(avg.steps)) %>% select(interval)
 
 Looks like at interval 835. Hm... I wonder what time that is... say we added `835 / 5` minutes to midnight...
 
-```r
-midnight <- ymd('2016-04-17')
-midnight + minutes(835 / 5)
-```
-
-```
-## [1] "2016-04-17 02:47:00 UTC"
-```
 
 ## Imputing missing values
 
+Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
 
+Right... I don't wear my fitbit all the time either - my wrist would start stinking! (true story...)
+
+1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+
+
+```r
+sum(is.na(activity$steps))
+```
+
+```
+## [1] 2304
+```
+
+There are a total of 2304 missing values in the dataset.
+
+2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+I decide to use the mean for the 5-minute interval. Now I just need to figure out how to add this to the dataset...
+Let's create an `activity.imputed` version...
+
+
+```r
+activity.imputed <- merge(activity, interval.activity)
+activity.imputed$steps <- ifelse(is.na(activity.imputed$steps), 
+                                         activity.imputed$avg.steps, activity.imputed$steps)
+```
+
+3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+see `activity.imputed` above. let's just drop off the `avg.steps` column to make it equal to the original dataset:
+
+
+```r
+activity.imputed <- select(activity.imputed, steps, date, interval)
+```
+
+4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+Let us reuse some code from above, but using `activity.imputed` as input instead:
+
+
+```r
+daily.activity.imputed <- group_by(activity.imputed, date) %>% summarize(total = sum(steps))
+qplot(daily.activity.imputed$total, binwidth=1000)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png)
+
+- The mean total number of steps taken each day was 
+
+```r
+mean(daily.activity.imputed$total)
+```
+
+```
+## [1] 10766.19
+```
+- and the median was 
+
+```r
+median(daily.activity.imputed$total)
+```
+
+```
+## [1] 10766.19
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
